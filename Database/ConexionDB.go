@@ -2,8 +2,10 @@ package Database
 
 import (
 	"context"
+	"database/sql"
 	"sync"
 
+	_ "github.com/go-sql-driver/mysql"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -20,7 +22,7 @@ var mongoOnce sync.Once
 
 // He usado las siguientes constantes solo para mantener las configuraciones requeridas de la base de datos.
 const (
-	CONNECTIONSTRING = "mongodb://localhost:27017"
+	CONNECTIONSTRING = "mongodb+srv://Cristian:swordfish.0@mycluster.zbtnv.mongodb.net/test"
 	DB               = "db_issue_manager"
 	ISSUES           = "col_issues"
 )
@@ -48,4 +50,14 @@ func GetMongoClient() (*mongo.Client, error) {
 	})
 	return clientInstance, clientInstanceError
 
+}
+func GetMySqlClient() (db *sql.DB, e error) {
+
+	db, err := sql.Open("mysql", "root:admin@tcp(localhost:3306)/products")
+
+	if err != nil {
+		return nil, err
+	}
+
+	return db, nil
 }
