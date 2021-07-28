@@ -5,17 +5,16 @@ import (
 	"TeamProducts/Models"
 	"database/sql"
 	"fmt"
-
-	"github.com/gin-gonic/gin"
 )
 
 type Implement struct {
 	db *sql.DB
-	// c  *gin.Context
 }
 
+var productModel Models.Products
+var productos []Models.Products
+
 func (i Implement) GetAllProducts() ([]Models.Products, error) {
-	productos := []Models.Products{}
 	db, err := Database.GetMySqlClient()
 	if err != nil {
 		return nil, err
@@ -28,34 +27,64 @@ func (i Implement) GetAllProducts() ([]Models.Products, error) {
 	}
 	defer filas.Close()
 
-	var p Models.Products
-
 	for filas.Next() {
-		err = filas.Scan(&p.IdProduct, &p.Nombre, &p.Stock, &p.PrecioU)
-		// Al escanear puede haber un error
+		err = filas.Scan(&productModel.IdProduct, &productModel.Nombre, &productModel.Stock, &productModel.PrecioU, &productModel.IdCiudad)
 		if err != nil {
-
-			fmt.Println(err)
 			return nil, err
 		}
-		// Y si no, entonces agregamos lo leído al arreglo
-		productos = append(productos, p)
-		// fmt.Println(productos)
-		// Vacío o no, regresamos el arreglo de contactos
+		productos = append(productos, productModel)
 	}
 	return productos, nil
 
 }
 
-func (i Implement) GetProductsById(c *gin.Context) {
+func (i Implement) GetProductsById(id int64) (Models.Products, error) {
+
+	db, err := Database.GetMySqlClient()
+	if err != nil {
+		return Models.Products{}, err
+	}
+	defer db.Close()
+	filas, err := db.Query("SELECT * FROM products WHERE IdProduct = ?", id)
+
+	if err != nil {
+		return Models.Products{}, err
+	}
+	defer filas.Close()
+
+	for filas.Next() {
+
+		err = filas.Scan(&productModel.IdProduct, &productModel.Nombre, &productModel.Stock, &productModel.PrecioU, &productModel.IdCiudad)
+		if err != nil {
+
+			return Models.Products{}, err
+		}
+
+	}
+	return productModel, nil
 
 }
-func (i Implement) PostProducts(c *gin.Context) {
+func (i Implement) PostProducts() {
 
 }
-func (i Implement) UpdateProducts(c *gin.Context) {
+func (i Implement) UpdateProducts(c Models.Products, id int) error {
+	db, err := Database.GetMySqlClient()
+	if err != nil {
+		return err
+	}
+	defer db.Close()
 
+	sentenciaPreparada, err := db.Prepare("UPDATE products SET Nombre = ?, Stock = ?, PrecioU = ?,IdCiudad = ? WHERE IdProduct = ?")
+	fmt.Println("Sentencia", sentenciaPreparada)
+	if err != nil {
+		return err
+	}
+
+	defer sentenciaPreparada.Close()
+	// Pasar argumentos en el mismo orden que la consulta
+	_, err = sentenciaPreparada.Exec(c.Nombre, c.Stock, c.PrecioU, c.IdCiudad, id)
+	return err // Ya sea nil o sea un error, lo manejaremos desde donde hacemos la llamada
 }
-func (i Implement) DeleteProducts(c *gin.Context) {
+func (i Implement) DeleteProducts() {
 
 }
