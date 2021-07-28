@@ -3,6 +3,7 @@ package bussineslogic
 import (
 	data "TeamProducts/Data"
 	"TeamProducts/Models"
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -13,8 +14,8 @@ type ImplementBussines struct {
 	Data data.Implement
 }
 
+var p Models.Products
 var Array []Models.Products
-var err error
 
 func (i ImplementBussines) GetAll(c *gin.Context) {
 
@@ -48,12 +49,23 @@ func (i ImplementBussines) GetProductById(c *gin.Context) {
 		})
 	}
 }
+func (i ImplementBussines) SaveProduct(c *gin.Context) {
+
+	err := c.ShouldBindJSON(&p)
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": err.Error(),
+		})
+	}
+	fmt.Println(p)
+	i.Data.PostProducts(p)
+}
 
 func (i ImplementBussines) Update(c *gin.Context) {
-	var p Models.Products
 	idParam := c.Param("id")
 	id, _ := strconv.ParseInt(idParam, 10, 64)
-	err = c.ShouldBindJSON(&p)
+	err := c.ShouldBindJSON(&p)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": err.Error(),
@@ -61,4 +73,18 @@ func (i ImplementBussines) Update(c *gin.Context) {
 	}
 	i.Data.UpdateProducts(p, int(id))
 
+}
+
+func (i ImplementBussines) Delete(c *gin.Context) {
+
+	idParam := c.Param("id")
+	id, _ := strconv.ParseInt(idParam, 10, 64)
+
+	err := i.Data.DeleteProducts(int(id))
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": err.Error(),
+		})
+	}
 }

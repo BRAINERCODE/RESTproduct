@@ -12,9 +12,9 @@ func main() {
 
 	c.GET("/productos", i.GetAll)             //Done
 	c.GET("/productos/:id", i.GetProductById) //Done
-	// c.POST("/productos", i.PostProducts)      //Done
-	c.PUT("/productos/:id", i.Update) //Done
-	// c.DELETE("productos/:id", i.DeleteProducts) //Done
+	c.POST("/productos", i.SaveProduct)       //Done
+	c.PUT("/productos/:id", i.Update)         //Done
+	c.DELETE("productos/:id", i.Delete)       //Done
 	c.Run(":8090")
 
 }

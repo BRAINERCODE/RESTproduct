@@ -64,7 +64,26 @@ func (i Implement) GetProductsById(id int64) (Models.Products, error) {
 	return productModel, nil
 
 }
-func (i Implement) PostProducts() {
+func (i Implement) PostProducts(c Models.Products) error {
+
+	db, err := Database.GetMySqlClient()
+	if err != nil {
+		return err
+	}
+	defer db.Close()
+
+	sentencia, err := db.Prepare("INSERT INTO products (IdProduct,Nombre, Stock, PrecioU, IdCiudad) VALUES(?,?, ?, ?,?)")
+	if err != nil {
+		return err
+	}
+	defer sentencia.Close()
+	_, err = sentencia.Exec(c.IdProduct, c.Nombre, c.Stock, c.PrecioU, c.IdCiudad)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
 
 }
 func (i Implement) UpdateProducts(c Models.Products, id int) error {
@@ -85,6 +104,22 @@ func (i Implement) UpdateProducts(c Models.Products, id int) error {
 	_, err = sentenciaPreparada.Exec(c.Nombre, c.Stock, c.PrecioU, c.IdCiudad, id)
 	return err // Ya sea nil o sea un error, lo manejaremos desde donde hacemos la llamada
 }
-func (i Implement) DeleteProducts() {
+func (i Implement) DeleteProducts(id int) error {
+	db, err := Database.GetMySqlClient()
+	if err != nil {
+		return err
+	}
+	defer db.Close()
 
+	sentenciaPreparada, err := db.Prepare("DELETE FROM products WHERE IdProduct = ?")
+	if err != nil {
+		return err
+	}
+	defer sentenciaPreparada.Close()
+
+	_, err = sentenciaPreparada.Exec(id)
+	if err != nil {
+		return err
+	}
+	return nil
 }
