@@ -3,7 +3,6 @@ package bussineslogic
 import (
 	data "TeamProducts/Data"
 	"TeamProducts/Models"
-	"fmt"
 	"net/http"
 	"strconv"
 
@@ -58,7 +57,6 @@ func (i ImplementBussines) SaveProduct(c *gin.Context) {
 			"error": err.Error(),
 		})
 	}
-	fmt.Println(p)
 	i.Data.PostProducts(p)
 }
 
@@ -79,9 +77,7 @@ func (i ImplementBussines) Delete(c *gin.Context) {
 
 	idParam := c.Param("id")
 	id, _ := strconv.ParseInt(idParam, 10, 64)
-
 	err := i.Data.DeleteProducts(int(id))
-
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": err.Error(),
